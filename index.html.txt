@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>LOK.A.D.08</title>
+  <style>
+    :root{
+      --bg:#f7f9fc; --card:#ffffff; --text:#0f172a; --muted:#64748b;
+      --primary:#1e4fd7; --accent:#14b8a6; --danger:#ef4444; --border:#e2e8f0;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text)}
+    .app{display:grid; grid-template-columns: 260px 1fr; min-height:100vh}
+    .sidebar{background:var(--card); border-right:1px solid var(--border); padding:16px; position:sticky; top:0; height:100vh}
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+    .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent))}
+    .nav{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+    .nav button{all:unset; cursor:pointer; padding:10px 12px; border-radius:10px; color:var(--muted)}
+    .nav button.active{background:#eef2ff; color:var(--primary); font-weight:600}
+    .main{padding:16px 16px 80px 16px}
+    .topbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px}
+    .topbar .left{display:flex; gap:10px; align-items:center}
+    .search{width:min(520px,100%); background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 12px}
+    .chip{display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); padding:8px 10px; border-radius:999px; color:var(--muted)}
+    .lang{display:flex; gap:6px}
+    .lang button{all:unset; cursor:pointer; padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:var(--card)}
+    .lang button.active{border-color:var(--primary); color:var(--primary); font-weight:600}
+    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:12px}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px}
+    .h{font-weight:700; margin:0 0 8px 0}
+    .muted{color:var(--muted); font-size:13px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .btn{cursor:pointer; border:1px solid var(--border); background:var(--card); padding:10px 12px; border-radius:12px}
+    .btn.primary{background:var(--primary); border-color:var(--primary); color:#fff}
+    .btn.danger{background:var(--danger); border-color:var(--danger); color:#fff}
+    input, textarea, select{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; outline:none;}
+    textarea{min-height:110px; resize:vertical}
+    .list{display:flex; flex-direction:column; gap:8px}
+    .item{display:flex; justify-content:space-between; gap:10px; align-items:center; border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:#fff}
+    .item .meta{display:flex; flex-direction:column}
+    .pill{display:inline-flex; padding:4px 8px; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:12px}
+    .status{display:inline-flex; gap:6px; align-items:center}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot.ns{background:#94a3b8}.dot.st{background:#f59e0b}.dot.dn{background:#22c55e}
+
+    .ai-toggle{position:fixed; right:16px; bottom:16px; z-index:50}
+    .ai-panel{position:fixed; top:0; right:0; width:min(420px,100%); height:100vh; background:var(--card); border-left:1px solid var(--border);
+      transform:translateX(100%); transition:.2s transform ease; z-index:60; display:flex; flex-direction:column;}
+    .ai-panel.open{transform:translateX(0)}
+    .ai-head{padding:14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center}
+    .ai-body{padding:12px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:10px}
+    .bubble{border:1px solid var(--border); border-radius:14px; padding:10px 12px; background:#fff; white-space:pre-wrap}
+    .bubble.me{border-color:#c7d2fe; background:#eef2ff}
+    .ai-foot{padding:12px; border-top:1px solid var(--border); display:flex; gap:8px}
+    .ai-foot input{flex:1}
+    .tabs{display:flex; gap:8px; margin-top:10px}
+    .tabs button{all:unset; cursor:pointer; padding:8px 10px; border-radius:10px; border:1px solid var(--border)}
+    .tabs button.active{border-color:var(--primary); color:var(--primary); font-weight:600}
+    .quick{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .hr{height:1px;background:var(--border); margin:10px 0}
+
+    html[dir="rtl"] .app{grid-template-columns: 1fr 260px}
+    html[dir="rtl"] .sidebar{border-right:none; border-left:1px solid var(--border)}
+    html[dir="rtl"] .ai-panel{right:auto; left:0; border-left:none; border-right:1px solid var(--border); transform:translateX(-100%)}
+    html[dir="rtl"] .ai-panel.open{transform:translateX(0)}
+    html[dir="rtl"] .ai-toggle{right:auto; left:16px}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div style="font-weight:800;letter-spacing:.5px">LOK.A.D.08</div>
+        <div class="muted">Medical Study OS</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px; margin-bottom:12px">
+      <div class="muted" id="userLine">Non connecté</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="btnLoginOpen">Connexion</button>
+        <button class="btn" id="btnLogout" style="display:none">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button data-view="dashboard" class="active" id="navDashboard">Tableau de bord</button>
+      <button data-view="units" id="navUnits">Unités</button>
+      <button data-view="standalone" id="navStandalone">Matières indépendantes</button>
+      <button data-view="planner" id="navPlanner">Planning</button>
+      <button data-view="progress" id="navProgress">Progrès</button>
+      <button data-view="admin" id="navAdmin" style="display:none">Admin</button>
+    </div>
+
+    <div class="hr"></div>
+    <div class="muted" id="tipBox">💡 FR par défaut. Vous pouvez basculer vers AR (RTL) ou EN.</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="left">
+        <input class="search" id="search" placeholder="Rechercher..."/>
+        <span class="chip" id="contextChip">FR • LOK.A.D.08</span>
+      </div>
+      <div class="lang">
+        <button id="langFR" class="active">FR</button>
+        <button id="langAR">AR</button>
+        <button id="langEN">EN</button>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard">
+      <div class="grid">
+        <div class="card" style="grid-column: span 7;">
+          <h3 class="h" id="dashTitle">Votre journée d’étude</h3>
+          <div class="muted" id="dashSubtitle">Plan intelligent + Pomodoro + révisions espacées</div>
+          <div class="hr"></div>
+          <div class="row">
+            <button class="btn primary" id="btnStartPomodoro">Démarrer Pomodoro (25 min)</button>
+            <button class="btn" id="btnAIPlan">Plan IA (7 jours)</button>
+          </div>
+          <div class="hr"></div>
+          <div class="muted" id="dashToday">Tâches du jour</div>
+          <div id="todayTasks" class="list" style="margin-top:10px"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 5;">
+          <h3 class="h" id="reviewsTitle">Révisions dues</h3>
+          <div class="muted" id="reviewsSubtitle">Méthode 1–3–7–14</div>
+          <div class="hr"></div>
+          <div id="dueReviews" class="list"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 12;">
+          <h3 class="h" id="quickStartTitle">Démarrage rapide</h3>
+          <div class="muted" id="quickStartSubtitle">Créez des unités → matières → leçons. L’assistant IA vous accompagne partout.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Units -->
+    <section id="view-units" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 5;">
+          <h3 class="h">Unités</h3>
+          <div class="muted">Ajoutez/supprimez vos unités</div>
+          <div class="hr"></div>
+          <div class="row">
+            <input id="unitTitle" placeholder="Unit title"/>
+            <button class="btn primary" id="btnAddUnit">Ajouter unité</button>
+          </div>
+          <div class="hr"></div>
+          <div id="unitsList" class="list"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 7;">
+          <h3 class="h">Matières dans l’unité</h3>
+          <div class="muted">Une unité contient des matières, une matière contient des leçons</div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <select id="unitSelect"></select>
+            <input id="subjectTitle" placeholder="Subject title"/>
+            <button class="btn primary" id="btnAddSubjectToUnit">Ajouter matière</button>
+          </div>
+
+          <div class="hr"></div>
+          <div id="subjectsList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Standalone + Lessons -->
+    <section id="view-standalone" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 5;">
+          <h3 class="h">Matières indépendantes</h3>
+          <div class="muted">Matières sans unité (unit_id = NULL)</div>
+          <div class="hr"></div>
+          <div class="row">
+            <input id="standSubjectTitle" placeholder="Subject title"/>
+            <button class="btn primary" id="btnAddStandaloneSubject">Ajouter matière</button>
+          </div>
+          <div class="hr"></div>
+          <div id="standSubjectsList" class="list"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 7;">
+          <h3 class="h">Leçons</h3>
+          <div class="muted">Ajoutez un cours, collez le contenu, puis utilisez l’IA</div>
+          <div class="hr"></div>
+
+          <div class="row">
+            <select id="subjectSelect"></select>
+            <input id="lessonTitle" placeholder="Lesson title"/>
+          </div>
+          <div style="margin-top:10px">
+            <textarea id="lessonContent" placeholder="Paste lesson content here (optional)"></textarea>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="btnAddLesson">Ajouter leçon</button>
+            <select id="lessonStatus">
+              <option value="not_started">not_started</option>
+              <option value="studying">studying</option>
+              <option value="done">done</option>
+            </select>
+          </div>
+
+          <div class="hr"></div>
+          <div id="lessonsList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Planner -->
+    <section id="view-planner" style="display:none">
+      <div class="card">
+        <h3 class="h">Planning médical</h3>
+        <div class="muted">Génère un planning adapté aux étudiants en médecine</div>
+        <div class="hr"></div>
+        <div class="row">
+          <input id="freeHours" type="number" min="1" max="12" placeholder="Heures/jour (ex: 3)"/>
+          <input id="examDate" type="date"/>
+          <button class="btn primary" id="btnGeneratePlan">Générer planning IA</button>
+        </div>
+        <div class="hr"></div>
+        <div id="planOutput" class="card" style="background:#fff"></div>
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section id="view-progress" style="display:none">
+      <div class="card">
+        <h3 class="h">Suivi de progression</h3>
+        <div class="muted">Avancement par matière et statut des leçons</div>
+        <div class="hr"></div>
+        <div id="progressBox" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Admin -->
+    <section id="view-admin" style="display:none">
+      <div class="card">
+        <h3 class="h">Panneau Admin</h3>
+        <div class="muted">Visible uniquement si is_admin = true</div>
+        <div class="hr"></div>
+        <div id="adminBox" class="list"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- AI Button -->
+<div class="ai-toggle">
+  <button class="btn primary" id="btnAIToggle">AI</button>
+</div>
+
+<!-- AI Sidebar -->
+<aside class="ai-panel" id="aiPanel">
+  <div class="ai-head">
+    <div>
+      <div style="font-weight:800" id="aiTitle">Assistant IA</div>
+      <div class="muted" id="aiSub">Gemini • Coach + Organizer + Lesson helper</div>
+      <div class="tabs">
+        <button id="tabChat" class="active">Chat</button>
+        <button id="tabQuick">Actions</button>
+      </div>
+    </div>
+    <button class="btn" id="btnAIClose">✕</button>
+  </div>
+
+  <div class="ai-body" id="aiBody">
+    <div class="bubble" id="aiWelcome">Bonjour 👋 Sélectionnez une leçon ثم جرّب: Résumé / QCM / Flashcards / Plan.</div>
+  </div>
+
+  <div class="ai-body" id="aiQuick" style="display:none">
+    <div class="muted">Actions rapides</div>
+    <div class="quick">
+      <button class="btn" id="qaOrganize">Organiser</button>
+      <button class="btn" id="qaSummary">Résumé</button>
+      <button class="btn" id="qaMCQ">MCQ</button>
+      <button class="btn" id="qaFlash">Flashcards</button>
+      <button class="btn" id="qaPlan">Plan</button>
+    </div>
+    <div class="hr"></div>
+    <div class="muted">Tip: اختر درسًا ثم نفّذ Summary/MCQ.</div>
+  </div>
+
+  <div class="ai-foot">
+    <input id="aiInput" placeholder="Ask..." />
+    <button class="btn primary" id="btnAISend">Envoyer</button>
+  </div>
+</aside>
+
+<!-- Login Modal -->
+<div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:80; padding:16px;">
+  <div class="card" style="max-width:520px; margin:40px auto;">
+    <h3 class="h">Connexion</h3>
+    <div class="muted">Email + OTP (Supabase Auth)</div>
+    <div class="hr"></div>
+    <div class="row">
+      <input id="loginEmail" placeholder="email"/>
+      <button class="btn primary" id="btnSendOTP">Envoyer OTP</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <input id="loginOTP" placeholder="OTP"/>
+      <button class="btn" id="btnVerifyOTP">Vérifier OTP</button>
+    </div>
+    <div class="hr"></div>
+    <div class="row">
+      <button class="btn" id="btnLoginClose">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  // =========================
+  // EDIT ONLY THESE TWO LINES
+  // =========================
+  const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const $ = (id) => document.getElementById(id);
+
+  let locale = "fr";
+  let currentUser = null;
+  let profile = null;
+
+  let selectedUnitId = null;
+  let selectedSubjectId = null;
+  let selectedLessonId = null;
+
+  function setDir(){
+    document.documentElement.lang = locale;
+    document.documentElement.dir  = (locale==="ar") ? "rtl" : "ltr";
+    $("contextChip").textContent = `${locale.toUpperCase()} • LOK.A.D.08`;
+    $("langFR").classList.toggle("active", locale==="fr");
+    $("langAR").classList.toggle("active", locale==="ar");
+    $("langEN").classList.toggle("active", locale==="en");
+  }
+
+  function showView(view){
+    ["dashboard","units","standalone","planner","progress","admin"].forEach(id=>{
+      $("view-"+id).style.display = (id===view) ? "" : "none";
+      const b = document.querySelector(`.nav button[data-view="${id}"]`);
+      if (b) b.classList.toggle("active", id===view);
+    });
+  }
+
+  const bubble = (text, me=false)=>{
+    const d = document.createElement("div");
+    d.className = "bubble" + (me ? " me" : "");
+    d.textContent = text;
+    return d;
+  };
+
+  async function refreshAuth(){
+    const { data: { session } } = await supabase.auth.getSession();
+    currentUser = session?.user ?? null;
+
+    $("btnLogout").style.display = currentUser ? "" : "none";
+    $("btnLoginOpen").style.display = currentUser ? "none" : "";
+
+    if (!currentUser){
+      profile=null;
+      $("userLine").textContent = "Non connecté";
+      $("navAdmin").style.display="none";
+      return;
+    }
+
+    const { data: prof } = await supabase.from("profiles").select("*").eq("user_id", currentUser.id).single();
+    profile = prof ?? null;
+
+    $("userLine").textContent =
+      `${profile?.full_name ?? currentUser.email ?? "User"}${profile?.year ? " • Y"+profile.year : ""}`;
+
+    if (profile?.locale && ["fr","ar","en"].includes(profile.locale)) {
+      locale = profile.locale;
+      setDir();
+    }
+
+    $("navAdmin").style.display = profile?.is_admin ? "" : "none";
+  }
+
+  async function saveLocale(){
+    setDir();
+    if (!currentUser) return;
+    await supabase.from("profiles").update({ locale }).eq("user_id", currentUser.id);
+  }
+
+  async function requireAuth(){
+    if (!currentUser) throw new Error("Login first");
+  }
+
+  async function loadUnits(){
+    await requireAuth();
+    const { data } = await supabase.from("units").select("*").order("order_index",{ascending:true});
+    $("unitsList").innerHTML = "";
+    $("unitSelect").innerHTML = "";
+    (data??[]).forEach(u=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML = `
+        <div class="meta"><div style="font-weight:700">${u.title}</div><div class="muted">Unit</div></div>
+        <div class="row">
+          <button class="btn" data-act="select">Select</button>
+          <button class="btn danger" data-act="del">Del</button>
+        </div>
+      `;
+      it.querySelector('[data-act="select"]').onclick = ()=>{ selectedUnitId=u.id; refreshSubjectsForUnit(); };
+      it.querySelector('[data-act="del"]').onclick = async ()=>{ await supabase.from("units").delete().eq("id",u.id); if(selectedUnitId===u.id)selectedUnitId=null; await loadUnits(); };
+      $("unitsList").appendChild(it);
+
+      const opt=document.createElement("option");
+      opt.value=u.id; opt.textContent=u.title;
+      $("unitSelect").appendChild(opt);
+    });
+
+    if (!selectedUnitId && data?.length) selectedUnitId = data[0].id;
+    if (selectedUnitId) $("unitSelect").value = selectedUnitId;
+    await refreshSubjectsForUnit();
+  }
+
+  async function refreshSubjectsForUnit(){
+    if ($("unitSelect").value) selectedUnitId = $("unitSelect").value;
+    $("subjectsList").innerHTML = "";
+    if (!selectedUnitId) return;
+
+    const { data } = await supabase.from("subjects").select("*").eq("unit_id", selectedUnitId).order("order_index");
+    (data??[]).forEach(s=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta"><div style="font-weight:700">${s.title}</div><div class="muted">Subject in unit</div></div>
+        <div class="row">
+          <button class="btn" data-act="open">Open</button>
+          <button class="btn danger" data-act="del">Del</button>
+        </div>
+      `;
+      it.querySelector('[data-act="open"]').onclick = async ()=>{
+        selectedSubjectId=s.id;
+        showView("standalone");
+        await loadSubjectsForLessonSelect();
+        $("subjectSelect").value = s.id;
+        await loadLessons();
+      };
+      it.querySelector('[data-act="del"]').onclick = async ()=>{
+        await supabase.from("subjects").delete().eq("id", s.id);
+        await refreshSubjectsForUnit();
+        await loadSubjectsForLessonSelect();
+      };
+      $("subjectsList").appendChild(it);
+    });
+  }
+
+  async function loadStandaloneSubjects(){
+    await requireAuth();
+    const { data } = await supabase.from("subjects").select("*").is("unit_id", null).order("order_index");
+    $("standSubjectsList").innerHTML="";
+    (data??[]).forEach(s=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta"><div style="font-weight:700">${s.title}</div><div class="muted">Standalone subject</div></div>
+        <div class="row">
+          <button class="btn" data-act="open">Open</button>
+          <button class="btn danger" data-act="del">Del</button>
+        </div>
+      `;
+      it.querySelector('[data-act="open"]').onclick = async ()=>{
+        selectedSubjectId=s.id;
+        await loadSubjectsForLessonSelect();
+        $("subjectSelect").value=s.id;
+        await loadLessons();
+      };
+      it.querySelector('[data-act="del"]').onclick = async ()=>{
+        await supabase.from("subjects").delete().eq("id", s.id);
+        if (selectedSubjectId===s.id) selectedSubjectId=null;
+        await loadStandaloneSubjects();
+        await loadSubjectsForLessonSelect();
+        await loadLessons();
+      };
+      $("standSubjectsList").appendChild(it);
+    });
+  }
+
+  async function loadSubjectsForLessonSelect(){
+    await requireAuth();
+    const { data } = await supabase.from("subjects").select("*").order("created_at",{ascending:false});
+    $("subjectSelect").innerHTML="";
+    (data??[]).forEach(s=>{
+      const opt=document.createElement("option");
+      opt.value=s.id;
+      opt.textContent = s.title + (s.unit_id ? " (Unit)" : " (Standalone)");
+      $("subjectSelect").appendChild(opt);
+    });
+    if (!selectedSubjectId && data?.length) selectedSubjectId = data[0].id;
+    if (selectedSubjectId) $("subjectSelect").value = selectedSubjectId;
+  }
+
+  const statusDot = (st)=> st==="done"?"dn":(st==="studying"?"st":"ns");
+
+  async function loadLessons(){
+    await requireAuth();
+    if ($("subjectSelect").value) selectedSubjectId = $("subjectSelect").value;
+    if (!selectedSubjectId) return;
+
+    const { data } = await supabase.from("lessons").select("*").eq("subject_id", selectedSubjectId).order("order_index");
+    $("lessonsList").innerHTML="";
+    (data??[]).forEach(l=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta">
+          <div style="font-weight:700">${l.title}</div>
+          <div class="muted"><span class="status"><span class="dot ${statusDot(l.status)}"></span>${l.status}</span></div>
+        </div>
+        <div class="row">
+          <button class="btn" data-act="select">Select</button>
+          <button class="btn" data-act="done">Done</button>
+          <button class="btn danger" data-act="del">Del</button>
+        </div>
+      `;
+      it.querySelector('[data-act="select"]').onclick = ()=>{
+        selectedLessonId=l.id;
+        $("aiBody").appendChild(bubble("Selected lesson: "+l.title,false));
+        $("aiPanel").classList.add("open");
+      };
+      it.querySelector('[data-act="done"]').onclick = async ()=>{
+        await supabase.from("lessons").update({status:"done"}).eq("id",l.id);
+        const due=new Date(Date.now()+24*3600*1000);
+        await supabase.from("reviews").insert({user_id:currentUser.id, lesson_id:l.id, review_stage:1, due_at:due.toISOString()});
+        await loadLessons(); await loadDueReviews();
+      };
+      it.querySelector('[data-act="del"]').onclick = async ()=>{
+        await supabase.from("lessons").delete().eq("id",l.id);
+        if (selectedLessonId===l.id) selectedLessonId=null;
+        await loadLessons();
+      };
+      $("lessonsList").appendChild(it);
+    });
+  }
+
+  async function loadDueReviews(){
+    if (!currentUser) return;
+    const { data } = await supabase.from("reviews")
+      .select("*, lessons(title)")
+      .is("done_at", null)
+      .lte("due_at", new Date().toISOString())
+      .order("due_at",{ascending:true});
+
+    $("dueReviews").innerHTML="";
+    (data??[]).forEach(r=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta">
+          <div style="font-weight:700">${r.lessons?.title ?? "Lesson"}</div>
+          <div class="muted">Stage ${r.review_stage} • ${new Date(r.due_at).toLocaleString()}</div>
+        </div>
+        <div class="row"><button class="btn primary" data-act="mark">Mark done</button></div>
+      `;
+      it.querySelector('[data-act="mark"]').onclick = async ()=>{
+        await supabase.from("reviews").update({done_at:new Date().toISOString()}).eq("id",r.id);
+        const addDays = (r.review_stage===1)?3 : (r.review_stage===2)?7 : (r.review_stage===3)?14 : null;
+        if (addDays){
+          const due = new Date(Date.now()+addDays*24*3600*1000);
+          await supabase.from("reviews").insert({user_id:currentUser.id, lesson_id:r.lesson_id, review_stage:r.review_stage+1, due_at:due.toISOString()});
+        }
+        await loadDueReviews();
+      };
+      $("dueReviews").appendChild(it);
+    });
+  }
+
+  async function loadProgress(){
+    await requireAuth();
+    const { data: subjects } = await supabase.from("subjects").select("id,title,unit_id");
+    $("progressBox").innerHTML="";
+    for (const s of (subjects??[])){
+      const { data: lessons } = await supabase.from("lessons").select("status").eq("subject_id", s.id);
+      const total=lessons?.length??0;
+      const done=(lessons??[]).filter(x=>x.status==="done").length;
+      const studying=(lessons??[]).filter(x=>x.status==="studying").length;
+      const pct=total?Math.round(done/total*100):0;
+
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta">
+          <div style="font-weight:800">${s.title}</div>
+          <div class="muted">${pct}% • done ${done}/${total} • studying ${studying}</div>
+        </div>
+        <div class="pill">${s.unit_id ? "Unit" : "Standalone"}</div>
+      `;
+      $("progressBox").appendChild(it);
+    }
+  }
+
+  async function loadAdmin(){
+    if (!profile?.is_admin) return;
+    $("adminBox").innerHTML="";
+    const { data } = await supabase.from("profiles")
+      .select("full_name,year,locale,is_admin,created_at")
+      .order("created_at",{ascending:false}).limit(20);
+    (data??[]).forEach(u=>{
+      const it=document.createElement("div");
+      it.className="item";
+      it.innerHTML=`
+        <div class="meta">
+          <div style="font-weight:800">${u.full_name ?? "—"}</div>
+          <div class="muted">Y${u.year ?? "?"} • ${u.locale} • admin: ${u.is_admin}</div>
+        </div>
+        <div class="pill">${new Date(u.created_at).toLocaleDateString()}</div>
+      `;
+      $("adminBox").appendChild(it);
+    });
+  }
+
+  async function getSelectedLessonText(){
+    if (!selectedLessonId) return null;
+    const { data } = await supabase.from("lessons").select("title,content_text").eq("id", selectedLessonId).single();
+    if (!data) return null;
+    return { title: data.title, content: data.content_text ?? "" };
+  }
+
+  async function callAI(endpoint, payload){
+    const r = await fetch(endpoint, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
+    if (!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+
+  async function aiQuick(type){
+    if (!currentUser) return;
+    const lesson = await getSelectedLessonText();
+    if (!lesson && type!=="plan") {
+      $("aiBody").appendChild(bubble("Select a lesson first.", false));
+      $("aiPanel").classList.add("open");
+      return;
+    }
+
+    let endpoint="/api/ai/summary";
+    if(type==="mcq") endpoint="/api/ai/mcq";
+    if(type==="flashcards") endpoint="/api/ai/flashcards";
+    if(type==="organize") endpoint="/api/ai/organize";
+    if(type==="plan") endpoint="/api/ai/plan";
+
+    const payload = (type==="plan")
+      ? { locale, free_hours: Number($("freeHours").value||3), exam_date: $("examDate").value || null }
+      : { locale, lesson_title: lesson.title, lesson_text: lesson.content };
+
+    $("aiBody").appendChild(bubble("…", false));
+    $("aiPanel").classList.add("open");
+
+    const out = await callAI(endpoint, payload);
+    $("aiBody").lastChild.textContent = out.text || JSON.stringify(out);
+
+    if (selectedLessonId && out.text) {
+      await supabase.from("ai_outputs").insert({ user_id: currentUser.id, lesson_id: selectedLessonId, type, content:{ text: out.text, locale }});
+    }
+  }
+
+  // ===== Events =====
+  document.querySelectorAll(".nav button").forEach(b=>{
+    b.onclick = async ()=>{
+      const v = b.dataset.view;
+      showView(v);
+      if (!currentUser) return;
+      if (v==="units") await loadUnits();
+      if (v==="standalone"){ await loadStandaloneSubjects(); await loadSubjectsForLessonSelect(); await loadLessons(); }
+      if (v==="progress") await loadProgress();
+      if (v==="admin") await loadAdmin();
+    };
+  });
+
+  $("langFR").onclick = async ()=>{ locale="fr"; await saveLocale(); };
+  $("langAR").onclick = async ()=>{ locale="ar"; await saveLocale(); };
+  $("langEN").onclick = async ()=>{ locale="en"; await saveLocale(); };
+
+  $("btnLoginOpen").onclick = ()=> $("loginModal").style.display="";
+  $("btnLoginClose").onclick = ()=> $("loginModal").style.display="none";
+
+  $("btnSendOTP").onclick = async ()=>{
+    const email = $("loginEmail").value.trim();
+    if (!email) return;
+    await supabase.auth.signInWithOtp({ email });
+    alert("OTP sent. Check your email.");
+  };
+
+  $("btnVerifyOTP").onclick = async ()=>{
+    const email = $("loginEmail").value.trim();
+    const token = $("loginOTP").value.trim();
+    if (!email || !token) return;
+    const { error } = await supabase.auth.verifyOtp({ email, token, type:"email" });
+    if (error) return alert(error.message);
+    $("loginModal").style.display="none";
+    await refreshAuth();
+    if (currentUser){
+      await loadUnits();
+      await loadStandaloneSubjects();
+      await loadSubjectsForLessonSelect();
+      await loadLessons();
+      await loadDueReviews();
+    }
+  };
+
+  $("btnLogout").onclick = async ()=>{ await supabase.auth.signOut(); await refreshAuth(); };
+
+  $("btnAddUnit").onclick = async ()=>{
+    await requireAuth();
+    const title = $("unitTitle").value.trim();
+    if (!title) return;
+    await supabase.from("units").insert({ user_id: currentUser.id, title });
+    $("unitTitle").value="";
+    await loadUnits();
+  };
+
+  $("unitSelect").onchange = async ()=>{ selectedUnitId = $("unitSelect").value; await refreshSubjectsForUnit(); };
+
+  $("btnAddSubjectToUnit").onclick = async ()=>{
+    await requireAuth();
+    const unit_id = $("unitSelect").value;
+    const title = $("subjectTitle").value.trim();
+    if (!unit_id || !title) return;
+    await supabase.from("subjects").insert({ user_id: currentUser.id, unit_id, title });
+    $("subjectTitle").value="";
+    await refreshSubjectsForUnit();
+    await loadSubjectsForLessonSelect();
+  };
+
+  $("btnAddStandaloneSubject").onclick = async ()=>{
+    await requireAuth();
+    const title = $("standSubjectTitle").value.trim();
+    if (!title) return;
+    await supabase.from("subjects").insert({ user_id: currentUser.id, unit_id: null, title });
+    $("standSubjectTitle").value="";
+    await loadStandaloneSubjects();
+    await loadSubjectsForLessonSelect();
+  };
+
+  $("subjectSelect").onchange = async ()=>{ selectedSubjectId = $("subjectSelect").value; await loadLessons(); };
+
+  $("btnAddLesson").onclick = async ()=>{
+    await requireAuth();
+    const subject_id = $("subjectSelect").value;
+    const title = $("lessonTitle").value.trim();
+    const content_text = $("lessonContent").value;
+    const status = $("lessonStatus").value;
+    if (!subject_id || !title) return;
+    await supabase.from("lessons").insert({ user_id: currentUser.id, subject_id, title, content_text, status });
+    $("lessonTitle").value="";
+    $("lessonContent").value="";
+    await loadLessons();
+  };
+
+  $("btnStartPomodoro").onclick = async ()=>{
+    if (!currentUser) return alert("Login first.");
+    await supabase.from("study_sessions").insert({ user_id: currentUser.id, lesson_id: selectedLessonId, method:"pomodoro", minutes:25 });
+    alert("Pomodoro saved (25 min).");
+  };
+
+  $("btnGeneratePlan").onclick = async ()=>{ await aiQuick("plan"); };
+
+  $("btnAIPlan").onclick = async ()=>{ await aiQuick("plan"); };
+
+  $("btnAIToggle").onclick = ()=> $("aiPanel").classList.toggle("open");
+  $("btnAIClose").onclick = ()=> $("aiPanel").classList.remove("open");
+
+  $("tabChat").onclick = ()=>{
+    $("tabChat").classList.add("active"); $("tabQuick").classList.remove("active");
+    $("aiBody").style.display=""; $("aiQuick").style.display="none";
+  };
+  $("tabQuick").onclick = ()=>{
+    $("tabQuick").classList.add("active"); $("tabChat").classList.remove("active");
+    $("aiBody").style.display="none"; $("aiQuick").style.display="";
+  };
+
+  $("qaOrganize").onclick = ()=> aiQuick("organize");
+  $("qaSummary").onclick = ()=> aiQuick("summary");
+  $("qaMCQ").onclick = ()=> aiQuick("mcq");
+  $("qaFlash").onclick = ()=> aiQuick("flashcards");
+  $("qaPlan").onclick = ()=> aiQuick("plan");
+
+  $("btnAISend").onclick = async ()=>{
+    const msg = $("aiInput").value.trim();
+    if (!msg) return;
+    $("aiInput").value="";
+    $("aiBody").appendChild(bubble(msg, true));
+    $("aiPanel").classList.add("open");
+
+    const lesson = await getSelectedLessonText();
+    const out = await callAI("/api/assistant/chat", {
+      locale,
+      message: msg,
+      context: {
+        selectedUnitId, selectedSubjectId, selectedLessonId,
+        lesson_title: lesson?.title ?? null,
+        lesson_text: (lesson?.content ?? "").slice(0, 12000)
+      }
+    });
+    $("aiBody").appendChild(bubble(out.text || JSON.stringify(out), false));
+  };
+
+  // init
+  setDir();
+  showView("dashboard");
+  await refreshAuth();
+  if (currentUser){
+    await loadUnits();
+    await loadStandaloneSubjects();
+    await loadSubjectsForLessonSelect();
+    await loadLessons();
+    await loadDueReviews();
+  }
+</script>
+</body>
+</html>
